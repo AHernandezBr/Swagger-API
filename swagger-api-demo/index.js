@@ -19,6 +19,69 @@ const users = [
   }
 ]
 
+const students = [
+  {
+    "id": 1,
+    "firstName": "Jose",
+    "lastName": "Montaño",
+    "age": 23,
+    "email": "Jose@axity.com",
+    "enrollmentNumber": "2024-001",
+    "courses": [
+      {
+        "courseId": 101,
+        "courseName": "Introduction to Programming",
+        "grade": "A"
+      },
+      {
+        "courseId": 102,
+        "courseName": "Data Structures"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": 2,
+    "firstName": "Alejandro",
+    "lastName": "Hernandez",
+    "age": 23,
+    "email": "alejandro@axity.com",
+    "enrollmentNumber": "2024-001",
+    "courses": [
+      {
+        "courseId": 101,
+        "courseName": "Introduction to Programming",
+        "grade": "A"
+      },
+      {
+        "courseId": 102,
+        "courseName": "Data Structures"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": 3,
+    "firstName": "Ricardo",
+    "lastName": "Rosas",
+    "age": 21,
+    "email": "ricardo@axity.com",
+    "enrollmentNumber": "2024-001",
+    "courses": [
+      {
+        "courseId": 101,
+        "courseName": "Introduction to Programming",
+        "grade": "A"
+      },
+      {
+        "courseId": 102,
+        "courseName": "Data Structures"
+      }
+    ],
+    "status": "active"
+  }
+]
+
 /**
  * @swagger
  * /login:
@@ -52,7 +115,6 @@ app.post('/login', (req, res) => {
 });
 
 
-
 /**
  * @swagger
  * /items:
@@ -65,7 +127,7 @@ app.post('/login', (req, res) => {
  *         description: A list of items
  */
 app.get('/items', authenticateToken, (req, res) => {
-  res.status(200).json({ message: 'GET request - Retrieve items' });
+  res.status(200).json({students});
 });
 
 /**
@@ -75,12 +137,95 @@ app.get('/items', authenticateToken, (req, res) => {
  *     summary: Create a new item
  *     security: 
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content: 
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 description: "The student's first name"
+ *               lastName:
+ *                 type: string
+ *                 description: "The student's last name"
+ *               age:
+ *                 type: integer
+ *                 description: "The student's age"
+ *               email:
+ *                 type: string
+ *                 description: "The student's email address"
+ *               enrollmentNumber:
+ *                 type: string
+ *                 description: "The student's enrollment number"
+ *               courses:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     courseId:
+ *                       type: integer
+ *                     courseName:
+ *                       type: string
+ *                     grade:
+ *                       type: string
+ *               status:
+ *                 type: string
+ *                 description: "The student's status"
+ *                 example: "active"
  *     responses:
  *       201:
- *         description: Item created successfully
+ *         description: Student created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 firstName:
+ *                   type: string
+ *                 lastName:
+ *                   type: string
+ *                 age:
+ *                   type: integer
+ *                 email:
+ *                   type: string
+ *                 enrollmentNumber:
+ *                   type: string
+ *                 courses:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       courseId:
+ *                         type: integer
+ *                       courseName:
+ *                         type: string
+ *                       grade:
+ *                         type: string
+ *                 status:
+ *                   type: string
+ *
  */
 app.post('/items', authenticateToken, (req, res) => {
-  res.status(201).json({ message: 'POST request - Create item' });
+  const {firstName, lastName, age, email, enrollmentNumber, courses, status} = req.body;
+  const studentObject = {
+    id: students.length +1,
+    firstName, 
+    lastName, 
+    age, 
+    email, 
+    enrollmentNumber, 
+    courses, 
+    status
+  } 
+  students.push(studentObject)
+  res.status(201).json({ 
+    message: 'Se ha añadido un estudiante',
+    nuevoEstudiante: studentObject
+  });
 });
 
 /**
@@ -101,30 +246,119 @@ app.post('/items', authenticateToken, (req, res) => {
  *       200:
  *         description: A single item
  */
+
 app.get('/items/:id',authenticateToken, (req, res) => {
-  res.status(200).json({ message: `GET request - Retrieve item with ID ${req.params.id}` });
+  const id = parseInt(req.params.id);
+  const student= students.find(student => student.id === id)
+  res.status(200).json({ 
+    message: 'GET request - Retrieve item with ID',
+    estudiante: student
+  });
 });
 
 /**
- * @swagger
- * /items/{id}:
- *   put:
- *     summary: Update an item by ID
- *     security: 
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID of the item to update
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Item updated successfully
- */
+* @swagger
+* /items/{id}:
+*   put:
+*     summary: Update an item by ID
+*     security:
+*        - bearerAuth: []
+*     parameters:
+*       - in: path
+*         name: id
+*         required: true
+*         description: ID of the item to retrieve
+*         schema:
+*           type: string
+*     requestBody:
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             properties:
+*               firstName:
+*                 type: string
+*                 description: "The student's first name"
+*               lastName:
+*                 type: string
+*                 description: "The student's last name"
+*               age:
+*                 type: integer
+*                 description: "The student's age"
+*               email:
+*                 type: string
+*                 description: "The student's email address"
+*               enrollmentNumber:
+*                 type: string
+*                 description: "The student's enrollment number"
+*               courses:
+*                 type: array
+*                 items:
+*                   type: object
+*                   properties:
+*                     courseId:
+*                       type: integer
+*                     courseName:
+*                       type: string
+*                     grade:
+*                       type: string
+*               status:
+*                 type: string
+*                 description: "The student's status"
+*                 example: "active"
+*     responses:
+*       201:
+*         description: Student created successfully
+*         content:
+*           application/json:
+*             schema:
+*               type: object
+*               properties:
+*                 id:
+*                   type: integer
+*                 firstName:
+*                   type: string
+*                 lastName:
+*                   type: string
+*                 age:
+*                   type: integer
+*                 email:
+*                   type: string
+*                 enrollmentNumber:
+*                   type: string
+*                 courses:
+*                   type: array
+*                   items:
+*                     type: object
+*                     properties:
+*                       courseId:
+*                         type: integer
+*                       courseName:
+*                         type: string
+*                       grade:
+*                         type: string
+*                 status:
+*                   type: string
+*/
 app.put('/items/:id',authenticateToken, (req, res) => {
-  res.status(200).json({ message: `PUT request - Update item with ID ${req.params.id}` });
+  const id = parseInt(req.params.id);
+  const student= students.find(student => student.id === id);
+  const studentObject = {
+    id: id,
+    firstName, 
+    lastName, 
+    age, 
+    email, 
+    enrollmentNumber, 
+    courses, 
+    status
+  } 
+  student = studentObject
+  res.status(200).json({ 
+    message: `PUT request - Update item with ID' ${req.params.id}`,
+
+   });
 });
 
 /**
@@ -146,6 +380,11 @@ app.put('/items/:id',authenticateToken, (req, res) => {
  *         description: Item deleted successfully
  */
 app.delete('/items/:id', authenticateToken, (req, res) => {
+  for (let i=0; i<students.length; i++){
+    if(students.id === req.params.id){
+      students.pop[i]
+    }
+  }
   res.status(200).json({ message: `DELETE request - Delete item with ID ${req.params.id}` });
 });
 
